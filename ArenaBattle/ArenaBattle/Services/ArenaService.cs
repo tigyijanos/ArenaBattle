@@ -64,7 +64,7 @@ namespace ArenaBattle.Services
                 attacker.ReduceHealth();
                 defender.ReduceHealth();
 
-                // Incrase health of the resting heroes
+                // Increase health of the resting heroes
                 IncreaseHealthWhileResting(arena, attacker, defender);
             }
         }
