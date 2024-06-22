@@ -96,14 +96,14 @@ namespace ArenaBattle.Services
         {
             return attacker.Type switch
             {
-                HeroType.Archer => ArcherAttack(attacker, defender),
-                HeroType.Cavalry => CavalryAttack(attacker, defender),
-                HeroType.Swordsman => SwordsmanAttack(attacker, defender),
+                HeroType.Archer => ArcherAttack(defender),
+                HeroType.Cavalry => CavalryAttack(defender),
+                HeroType.Swordsman => SwordsmanAttack(defender),
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
 
-        private string ArcherAttack(Hero attacker, Hero defender)
+        private string ArcherAttack(Hero defender)
         {
             if (defender.Type == HeroType.Cavalry)
             {
@@ -119,13 +119,13 @@ namespace ArenaBattle.Services
             return $"Archer killed {defender.Type}";
         }
 
-        private string CavalryAttack(Hero attacker, Hero defender)
+        private string CavalryAttack(Hero defender)
         {
             defender.Health = 0;
             return $"Cavalry killed {defender.Type}";
         }
 
-        private string SwordsmanAttack(Hero attacker, Hero defender)
+        private string SwordsmanAttack(Hero defender)
         {
             if (defender.Type == HeroType.Cavalry)
             {
