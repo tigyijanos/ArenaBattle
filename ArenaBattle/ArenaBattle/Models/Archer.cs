@@ -1,8 +1,9 @@
-﻿using ArenaBattle.Models.Enums;
+﻿using ArenaBattle.Interfaces.Model;
+using ArenaBattle.Models.Enums;
 
 namespace ArenaBattle.Models
 {
-    public class Archer : Hero
+    public class Archer : Hero, IHero
     {
         public override HeroType Type => HeroType.Archer;
 

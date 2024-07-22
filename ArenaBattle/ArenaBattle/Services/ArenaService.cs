@@ -1,18 +1,21 @@
-﻿using ArenaBattle.Models;
+﻿using ArenaBattle.Interfaces.Factories;
+using ArenaBattle.Interfaces.Model;
+using ArenaBattle.Interfaces.Services;
+using ArenaBattle.Models;
 using ArenaBattle.Models.Enums;
 
 namespace ArenaBattle.Services
 {
-    public class ArenaService
+    public class ArenaService(IHeroFactory heroFactory) : IArenaService
     {
         private static int _nextArenaId = 1;
-        private static List<Arena> _arenas = new();
-        private static Random _random = new();
+        private static readonly List<IArena> _arenas = [];
+        private static readonly Random _random = new();
 
         public int CreateArena(int numberOfHeroes)
         {
-            var heroes = new List<Hero>();
-            for (int i = 0; i < numberOfHeroes; i++)
+            var heroes = new List<IHero>();
+            for (var i = 0; i < numberOfHeroes; i++)
             {
                 heroes.Add(CreateRandomHero());
             }
@@ -27,20 +30,20 @@ namespace ArenaBattle.Services
             return arena.Id;
         }
 
-        public Arena GetArena(int id)
+        public IArena? GetArena(int id)
         {
             return _arenas.FirstOrDefault(a => a.Id == id);
         }
 
-        public void ExecuteBattle(Arena arena)
+        public void ExecuteBattle(IArena arena)
         {
-            while (arena.Heroes.Count(h => h.Health > 0) > 1)
+            while (arena.Heroes != null && arena.Heroes.Count(h => h.Health > 0) > 1)
             {
                 var activeHeroes = arena.Heroes.Where(h => h.Health > 0).ToList();
                 if (activeHeroes.Count <= 1) return;
 
                 var attackerIndex = _random.Next(activeHeroes.Count);
-                Hero attacker = activeHeroes[attackerIndex];
+                var attacker = activeHeroes[attackerIndex];
 
                 int defenderIndex;
                 do
@@ -48,8 +51,8 @@ namespace ArenaBattle.Services
                     defenderIndex = _random.Next(activeHeroes.Count);
                 } while (defenderIndex == attackerIndex);
 
-                Hero defender = activeHeroes[defenderIndex];
-                string outcome = ResolveAttack(attacker, defender);
+                var defender = activeHeroes[defenderIndex];
+                var outcome = ResolveAttack(attacker, defender);
                 arena.History.Add(new BattleHistory
                 {
                     Round = arena.History.Count + 1,
@@ -69,41 +72,36 @@ namespace ArenaBattle.Services
             }
         }
 
-        private void IncreaseHealthWhileResting(Arena arena, Hero attacker, Hero defender)
+        private static void IncreaseHealthWhileResting(IArena arena, IHero attacker, IHero defender)
         {
-            foreach (var hero in arena.Heroes)
-            {
-                if (hero.Health > 0 && hero != attacker && hero != defender)
+            if (arena.Heroes != null)
+                foreach (var hero in arena.Heroes)
                 {
-                    hero.IncreaseHealth(10);
+                    if (hero.Health > 0 && hero != attacker && hero != defender)
+                    {
+                        hero.IncreaseHealth(10);
+                    }
                 }
-            }
         }
 
-        private Hero CreateRandomHero()
+        private IHero CreateRandomHero()
         {
             var heroType = (HeroType)_random.Next(3);
-            return heroType switch
-            {
-                HeroType.Archer => new Archer(),
-                HeroType.Cavalry => new Cavalry(),
-                HeroType.Swordsman => new Swordsman(),
-                _ => throw new ArgumentOutOfRangeException()
-            };
+            return heroFactory.CreateHero(heroType);
         }
 
-        private string ResolveAttack(Hero attacker, Hero defender)
+        private string ResolveAttack(IHero attacker, IHero defender)
         {
             return attacker.Type switch
             {
                 HeroType.Archer => ArcherAttack(defender),
                 HeroType.Cavalry => CavalryAttack(defender),
                 HeroType.Swordsman => SwordsmanAttack(defender),
-                _ => throw new ArgumentOutOfRangeException()
+                _ => throw new ArgumentOutOfRangeException(nameof(attacker))
             };
         }
 
-        private string ArcherAttack(Hero defender)
+        private string ArcherAttack(IHero defender)
         {
             if (defender.Type == HeroType.Cavalry)
             {
@@ -119,13 +117,13 @@ namespace ArenaBattle.Services
             return $"Archer killed {defender.Type}";
         }
 
-        private string CavalryAttack(Hero defender)
+        private string CavalryAttack(IHero defender)
         {
             defender.Health = 0;
             return $"Cavalry killed {defender.Type}";
         }
 
-        private string SwordsmanAttack(Hero defender)
+        private string SwordsmanAttack(IHero defender)
         {
             if (defender.Type == HeroType.Cavalry)
             {

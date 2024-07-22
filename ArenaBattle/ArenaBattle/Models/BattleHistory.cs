@@ -1,11 +1,13 @@
-﻿namespace ArenaBattle.Models
+﻿using ArenaBattle.Interfaces.Model;
+
+namespace ArenaBattle.Models
 {
-    public class BattleHistory
+    public class BattleHistory : IBattleHistory
     {
         public int Round { get; set; }
-        public Hero Attacker { get; set; }
-        public Hero Defender { get; set; }
-        public string Outcome { get; set; }
+        public IHero? Attacker { get; set; }
+        public IHero? Defender { get; set; }
+        public string? Outcome { get; set; }
         public int AttackerHealthAfter { get; set; }
         public int DefenderHealthAfter { get; set; }
     }

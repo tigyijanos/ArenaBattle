@@ -1,10 +1,9 @@
-﻿using ArenaBattle.Models;
+﻿using ArenaBattle.Interfaces.Model;
 using ArenaBattle.Models.Enums;
-using Should;
 
 namespace ArenaBattle.Tests.Models
 {
-    public abstract class HeroTests<THero> where THero : Hero, new()
+    public abstract class HeroTests<THero> : TestsBase where THero : IHero, new()
     {
         protected abstract int ExpectedInitialHealth { get; }
 
@@ -18,7 +17,7 @@ namespace ArenaBattle.Tests.Models
             var hero = new THero();
 
             // Assert
-            hero.Health.ShouldEqual(ExpectedInitialHealth);
+            Assert.Equal(hero.Health, ExpectedInitialHealth);
         }
 
         [Theory]
@@ -27,14 +26,16 @@ namespace ArenaBattle.Tests.Models
         public void ReduceHealth(int expected, int initial)
         {
             // Arrange
-            var hero = new THero();
-            hero.Health = initial;
+            var hero = new THero
+            {
+                Health = initial
+            };
 
             // Act
             hero.ReduceHealth();
 
             // Assert
-            hero.Health.ShouldEqual(expected);
+            Assert.Equal(hero.Health, expected);
         }
 
         [Fact]
@@ -45,7 +46,7 @@ namespace ArenaBattle.Tests.Models
             var hero = new THero();
 
             // Assert
-            hero.Type.ShouldEqual(ExpectedType);
+            Assert.Equal(hero.Type, ExpectedType);
         }
     }
 }

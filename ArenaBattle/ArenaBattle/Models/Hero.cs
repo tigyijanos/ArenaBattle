@@ -1,11 +1,12 @@
-﻿using ArenaBattle.Models.Enums;
+﻿using ArenaBattle.Interfaces.Model;
+using ArenaBattle.Models.Enums;
 
 namespace ArenaBattle.Models
 {
     /// <summary>
     /// Represents the base class for all heroes.
     /// </summary>
-    public abstract class Hero
+    public abstract class Hero : IHero
     {
         /// <summary>
         /// Gets or sets the unique identifier of the hero.
@@ -23,9 +24,10 @@ namespace ArenaBattle.Models
         /// <summary>
         /// Initializes a new instance of the <see cref="Hero"/> class with a unique identifier and initial health.
         /// </summary>
-        public Hero()
+        protected Hero()
         {
             Id = Guid.NewGuid();
+            // ReSharper disable once VirtualMemberCallInConstructor
             Health = GetInitialHealth();
         }
 

@@ -1,3 +1,6 @@
+using ArenaBattle.Factories;
+using ArenaBattle.Interfaces.Factories;
+using ArenaBattle.Interfaces.Services;
 using ArenaBattle.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +11,10 @@ builder.Services.AddSingleton<ArenaService>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddSingleton<IHeroFactory, HeroFactory>();
+
+builder.Services.AddScoped<IArenaService, ArenaService>();
 
 var app = builder.Build();
 

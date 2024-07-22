@@ -1,16 +1,16 @@
-﻿using ArenaBattle.Models.Enums;
-using ArenaBattle.Services;
-using Should;
+﻿using ArenaBattle.Interfaces.Services;
+using ArenaBattle.Models.Enums;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ArenaBattle.Tests.Services
 {
-    public class ArenaServiceTests
+    public class ArenaServiceTests : TestsBase
     {
-        private readonly ArenaService _service;
+        private readonly IArenaService? _service;
 
         public ArenaServiceTests()
         {
-            _service = new ArenaService();
+            _service = ServiceProvider.GetService<IArenaService>();
         }
 
         [Theory]
@@ -23,12 +23,12 @@ namespace ArenaBattle.Tests.Services
         public void CreateArena_ShouldCreateArenaWithHeroes(int numberOfHeroes)
         {
             // Arrange && Act
-            int arenaId = _service.CreateArena(numberOfHeroes);
+            var arenaId = _service!.CreateArena(numberOfHeroes);
             var arena = _service.GetArena(arenaId);
 
             // Assert
             Assert.NotNull(arena);
-            Assert.Equal(numberOfHeroes, arena.Heroes.Count);
+            Assert.Equal(numberOfHeroes, arena.Heroes!.Count);
         }
 
         [Theory]
@@ -38,17 +38,17 @@ namespace ArenaBattle.Tests.Services
         public void CreateArena_InitialHealth(HeroType heroType, int initialHealth)
         {
             // Arrange
-            int numberOfHeroes = 5;
+            var numberOfHeroes = 5;
 
             // Act
-            int arenaId = _service.CreateArena(numberOfHeroes);
+            var arenaId = _service!.CreateArena(numberOfHeroes);
             var arena = _service.GetArena(arenaId);
-            var heroes = arena.Heroes.Where(x => x.Type == heroType).ToList();
+            var heroes = arena!.Heroes!.Where(x => x.Type == heroType).ToList();
 
             // Assert
             foreach (var hero in heroes)
             {
-                hero.Health.ShouldEqual(initialHealth);
+                Assert.Equal(hero.Health, initialHealth);
             }
         }
 
@@ -56,26 +56,26 @@ namespace ArenaBattle.Tests.Services
         public void ExecuteBattle_ShouldExecuteAndUpdateHistory()
         {
             // Arrange
-            int arenaId = _service.CreateArena(5);
+            var arenaId = _service!.CreateArena(5);
             var arena = _service.GetArena(arenaId);
 
             // Act
-            _service.ExecuteBattle(arena);
+            _service.ExecuteBattle(arena!);
 
             // Assert
-            arena.History.ShouldNotBeEmpty();
-            arena.Heroes.Where(x => x.Health > 0).Count().ShouldBeLessThan(2);
+            Assert.NotEmpty(arena!.History);
+            Assert.True(arena.Heroes!.Count(x => x.Health > 0) < 2);
         }
 
         [Fact]
         public void ExecuteBattle_ShouldReduceHealthCorrectly()
         {
             // Arrange
-            int arenaId = _service.CreateArena(2);
+            var arenaId = _service!.CreateArena(2);
             var arena = _service.GetArena(arenaId);
 
             // Manually set health to test death condition
-            var hero = arena.Heroes.First();
+            var hero = arena!.Heroes!.First();
             hero.Health = 1;
 
             // Act
